@@ -4,4 +4,4 @@ all: cat
 cat: cat.o
 	gcc -s $^ -o $@
 clean:
-	rm *.o cat
+	rm -f *.o cat

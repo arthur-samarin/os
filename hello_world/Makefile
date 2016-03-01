@@ -4,4 +4,4 @@ all: hello_world
 hello_world: hello_world.o
 	gcc -s $^ -o $@
 clean:
-	rm *.o hello_world
+	rm -f *.o hello_world
