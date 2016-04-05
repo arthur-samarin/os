@@ -133,15 +133,22 @@ void run_commands(vector<command> cmds) {
         }
 
         pid_t f = fork();
+        if (f == -1) {
+            handle_error("fork");
+        }
 
         if (f != 0) {
             it->pid = f;
             it->running = true;
             if (in_fd != STDIN_FILENO) {
-                close(in_fd);
+                if(close(in_fd) == -1) {
+                    handle_error("parent close in");
+                }
             }
             if (out_fd != STDOUT_FILENO) {
-                close(out_fd);
+                if(close(out_fd) == -1) {
+                    handle_error("parent close out");
+                }
             }
         } else {
             // Child
@@ -153,12 +160,20 @@ void run_commands(vector<command> cmds) {
             args[cmd.args.size()] = 0;
 
             if (in_fd != STDIN_FILENO) {
-                dup2(in_fd, STDIN_FILENO);
-                close(in_fd);
+                if(dup2(in_fd, STDIN_FILENO) == -1) {
+                    handle_error("dup2 stdin");
+                }
+                if(close(in_fd) == -1) {
+                    handle_error("child close temp in");
+                }
             }
             if (out_fd != STDOUT_FILENO) {
-                dup2(out_fd, STDOUT_FILENO);
-                close(out_fd);
+                if(dup2(out_fd, STDOUT_FILENO) == -1) {
+                    handle_error("dup2 stdout");
+                }
+                if(close(out_fd) == -1) {
+                    handle_error("child close temp out");
+                }
             }
 
             if (execvp(cmd.args[0].data(), args) == -1) {
